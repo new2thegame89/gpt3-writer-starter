@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap');
 
+
 body {
     margin: 0;
     padding: 0;
@@ -136,6 +137,38 @@ textarea {
     padding: 0px;
     position: relative;
     width: 100%;
+}
+
+.button-holder {
+    display: flex;
+    place-content: center;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    flex-flow: column nowrap;
+    gap: 12px;
+    height: min-content;
+    overflow: hidden;
+    padding: 5px;
+    position: relative;
+    width: 100%;
+    background-color: rgb(255, 79, 18);
+    border-radius: 100px;
+    color: white;
+    font-weight: 700;
+    border-style: hidden;
+    margin-top: 10px;
+}
+
+.button{
+    display: flex;
+    place-content: center;
+    align-items: center;
+    background-color: rgb(255, 79, 18);
+    border-radius: 100px;
+    gap: 12px;
+    overflow: hidden;
+    padding: 0px;
 }
 
 .key-stroke {
@@ -297,6 +330,19 @@ textarea {
 }
 
 .output-header h3 {
+    font-family: "Manrope", serif;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0px;
+    line-height: 1.4em;
+    text-align: start;
+    color: #ffffff;
+    text-decoration: none;
+    text-transform: none;
+    margin: 0;
+}
+.output-header h4 {
     font-family: "Manrope", serif;
     font-size: 28px;
     font-style: normal;
