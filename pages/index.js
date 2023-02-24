@@ -27,14 +27,18 @@ const Home = () => {
   function makeButtons(element_id,inputArray,enableGen) {
     // create a new array starting at the second element of the input array
     const buttonsArray = inputArray//.slice(1);
-    console.log(buttonsArray)
+    //console.log('here is buttonArray....')
+    //console.log(buttonsArray)
     // create a container element to hold the buttons
     const container = document.createElement('div');
-    console.log(container)
+    container.id = element_id;
+    //console.log('here is container....')
+    //console.log(container)
   
     // create a button for each element in the input array
     buttonsArray.forEach((element) => {
       const button = document.createElement('button');
+      button.id = element_id;
       button.innerHTML = element;
       button.className = 'button-holder'
   
@@ -42,35 +46,34 @@ const Home = () => {
       button.onclick = async () => {
         // capture the index and content of the selection
         const selection = element; //{ index, content: element };
-  
+        console.log('selection:', selection)
         // save the selection (how you save the selection is up to you)
-        saveSelection(selection);
-        //savedSelections = selection.replace(/[0-9.]/g, "");
-        //setSelectedTitle(savedSelections);
+        
+        saveSelection(selection,element_id);
 
         if (enableGen) {
           // Call the intro generator
-          //setHasBeenCalled(true)
           callStoryIntroEndpoint()
         }
-        console.log(selectedTitle)
       };
   
       // add the button to the container element
       container.appendChild(button);
     });
-  
+    
     // append the container element to the DOM
     document.getElementById(element_id).appendChild(container);
   }
 
-  function saveSelection(selection) {
+  function saveSelection(selection,element_id) {
     selection = selection.replace(/[0-9.]/g, "");
     savedSelections=selection;
-    setSelectedTitle(savedSelections);
+    if (element_id === 'choose-title-container') {
+      setSelectedTitle(savedSelections);
+    } else if (element_id === 'choose-one-button-container') {
+      console.log('success')
+    }
     
-    //selectedTitle(savedSelections);
-    //console.log(savedSelections);
   }
 
   const callGenerateEndpoint = async () => {
@@ -126,9 +129,11 @@ const Home = () => {
     const { output } = data;
     console.log("OpenAI replied with an intro...", output.text)
 
-    setApiIntroOutput(`${output.text}`);
-    console.log(output.text.split(/\r?\n|\r|\n/g))
+    //setApiIntroOutput(`${output.text}`);
+    console.log('here i am')
+    //console.log(output.text.split(' '))
     const GeneratedIntro = output.text.split(/\r?\n|\r|\n/g)
+    //setApiIntroOutput(GeneratedIntro);
     
     // find the index to option 1 and 2
     let idx1 = []
@@ -143,6 +148,8 @@ const Home = () => {
         idx2 = i;
       }
     }
+    setApiIntroOutput(GeneratedIntro.slice(0,idx1));
+    console.log(GeneratedIntro.slice(0,idx1));
     console.log(GeneratedIntro[idx1])
     console.log(GeneratedIntro[idx2])
     makeButtons('choose-one-button-container',[GeneratedIntro[idx1],GeneratedIntro[idx2]],0)
@@ -169,7 +176,7 @@ const Home = () => {
   return (
     <div className="root">
       <Head>
-        <title>GPT-3 Writer | buildspace</title>
+        <title>Dream Train Studios</title>
         {/*<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>*/}
       </Head>
       <div className="container">
@@ -243,7 +250,6 @@ const Home = () => {
         {/* ok great, now lets work on step 4, using the selected title to generate the beingging of the story*/}
         {selectedTitle && (
           <div>
-              {/*{hasBeenCalled ? callStoryIntroEndpoint() : null }*/}
             <div className='generate-title'>
               <div className='generate-title-header-container'>
                 <div className='output-header'>
@@ -251,19 +257,26 @@ const Home = () => {
                   <h3>Dream Cloud Studios presents:</h3>
                   <div className='output-content'>
                     <h3> {selectedTitle} </h3>
-                    {apiIntroOutput && (
                       <div className='output-content'>
                         <p>{apiIntroOutput}</p>
                         <div id="choose-one-button-container">
                         </div>
                       </div>
-                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* let's see if it works better by having it's own section to print the first part of the story
+        {apiIntroOutput && (
+          <div className='output-content'>
+            <p>{apiIntroOutput}</p>
+            <div id='choose-one-button-container'>
+            </div>
+          </div>
+        )} */}
         
         {/* This is the bit of code for the text entry box*/}
         <div className="prompt-container">
