@@ -14,11 +14,11 @@ const intoPromptThree = " a hero's background introduction. End the introduction
 const generateStoryIntroAction = async (req, res) => {
   // Run first prompt
   //console.log(`API: ${basePromptPrefix}${req.body.userInput}`)
-  console.log(`API: ${introPromptOne}${req.body.selectedTitle}${intoPromptTwo}${req.body.userInput_ChildName}${intoPromptThree}`)
+  console.log(`API: ${introPromptOne}${req.body.selection}${intoPromptTwo}${req.body.userInput_ChildName}${intoPromptThree}`)
 
   const baseCompletion = await openai.createCompletion({
     model: 'text-davinci-003',
-    prompt: `${introPromptOne}${req.body.selectedTitle}${intoPromptTwo}${req.body.userInput_ChildName}${intoPromptThree}\n`,
+    prompt: `${introPromptOne}${req.body.selection}${intoPromptTwo}${req.body.userInput_ChildName}${intoPromptThree}\n`,
     temperature: 0.9,
     max_tokens: 512,
   });

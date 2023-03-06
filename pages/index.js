@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import buildspaceLogo from '../assets/buildspace-logo.png';
-import { useState } from 'react';
+import { useEffect, useState , useRef } from 'react';
 import generateAction from './api/generate';
 import generateStoryIntroAction from './api/generateStoryIntro';
+import generateStoryP2Action from './api/generateStoryP2';
 
 let savedSelections = 'tmp'
 
@@ -15,12 +16,18 @@ const Home = () => {
   const [userInput, setUserInput] = useState('')
   const [apiOutput, setApiOutput] = useState('')
   const [apiIntroOutput, setApiIntroOutput] = useState('')
+  const ApiIntroOutputRef = useRef('');
+  const [apiP2Output, setApiP2Output] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isIntroGenerating, setIsIntroGenerating] = useState(false)
+  const [isP2Generating, setIsP2Generating] = useState(false)
   const [isIntro, setIsIntro] = useState(false)
   const [isTitleGenerated, setTitleGenerated] = useState(false)
   const [selectedTitle, setSelectedTitle] = useState('')
+  const selectedTitleRef = useRef('')
+  const [selectedIntro, setSelectedIntro] = useState('')
   const [generatedIntro, setGeneratedIntro] = useState('')
+  const [generatedP2, setGeneratedP2] = useState('')
 
   const [hasBeenCalled, setHasBeenCalled] = useState('');
 
@@ -49,18 +56,25 @@ const Home = () => {
         console.log('selection:', selection)
         // save the selection (how you save the selection is up to you)
         
-        saveSelection(selection,element_id);
+        const done = saveSelection(selection,element_id);
 
         if (enableGen) {
-          // Call the intro generator
-          callStoryIntroEndpoint()
+          if ((element_id === 'choose-title-container') && done ){
+              // Call the intro generator
+              callStoryIntroEndpoint(selectedTitleRef.current)
+          } else if ((element_id === 'choose-one-button-container') && done ){
+            console.log('success')
+            // Call the part 2 generator
+            callStoryPart2Endpoint(selectedTitleRef.current,selection,ApiIntroOutputRef.current)
+          }
+          
         }
       };
   
       // add the button to the container element
       container.appendChild(button);
     });
-    
+
     // append the container element to the DOM
     document.getElementById(element_id).appendChild(container);
   }
@@ -69,11 +83,12 @@ const Home = () => {
     selection = selection.replace(/[0-9.]/g, "");
     savedSelections=selection;
     if (element_id === 'choose-title-container') {
-      setSelectedTitle(savedSelections);
+      selectedTitleRef.current = savedSelections;
+      setSelectedTitle(prev => savedSelections);
     } else if (element_id === 'choose-one-button-container') {
-      console.log('success')
+      setSelectedIntro(prev => savedSelections);
     }
-    
+    return 1
   }
 
   const callGenerateEndpoint = async () => {
@@ -109,19 +124,20 @@ const Home = () => {
     return new Promise( res => setTimeout(res, delay) );
 }
 
-  const callStoryIntroEndpoint = async () => {
+  const callStoryIntroEndpoint = async (selection) => {
     setHasBeenCalled(false);
     setIsIntroGenerating(true);
     //setTitleGenerated(true);
     //await timeout(1000);
 
     console.log("Calling OpenAI to generate intro...") 
+    console.log(selection)
     const response = await fetch('/api/generateStoryIntro', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ selectedTitle, userInput_ChildName }),
+      body: JSON.stringify({ selection, userInput_ChildName }),
       //body: JSON.stringify({ userInput }),
     });
 
@@ -149,11 +165,61 @@ const Home = () => {
       }
     }
     setApiIntroOutput(GeneratedIntro.slice(0,idx1));
+    ApiIntroOutputRef.current = GeneratedIntro.slice(0,idx1);
     console.log(GeneratedIntro.slice(0,idx1));
     console.log(GeneratedIntro[idx1])
     console.log(GeneratedIntro[idx2])
-    makeButtons('choose-one-button-container',[GeneratedIntro[idx1],GeneratedIntro[idx2]],0)
+    makeButtons('choose-one-button-container',[GeneratedIntro[idx1],GeneratedIntro[idx2]],1)
     setIsIntroGenerating(false);
+    //setSelectedTitle(true);
+    setHasBeenCalled(false);
+    console.log("has been called? ",hasBeenCalled)
+  }
+
+  const callStoryPart2Endpoint = async (selectedTitle,selection,apiIntroOutput) => {
+    setHasBeenCalled(false);
+    setIsP2Generating(true); //setIsIntroGenerating(true);
+
+    console.log("Calling OpenAI to generate P2...") 
+    console.log(selectedTitle)
+    console.log(selectedIntro)
+    const selectionToUse = selection.replace(/[0-9.]/g, "");
+    console.log(selectionToUse)
+    const response = await fetch('/api/generateStoryP2', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ selectedTitle, selectionToUse, userInput_ChildName , apiIntroOutput}), // do i need to include the api output from the previous step here to build off of?
+      //body: JSON.stringify({ userInput }),
+    });
+
+    const data = await response.json();
+    const { output } = data;
+    console.log("OpenAI replied with Part2...", output.text)
+
+    //setApiIntroOutput(`${output.text}`);
+    console.log('here i am')
+    //console.log(output.text.split(' '))
+    const GeneratedP2 = output.text.split(/\r?\n|\r|\n/g)
+    //setApiIntroOutput(GeneratedIntro);
+    
+    // find the index to option 1 and 2
+    let idx1 = []
+    let idx2 = []
+    for (let i=0; i < GeneratedP2.length; i++) {
+      if (GeneratedP2[i][0] === '1'){
+        idx1 = i;
+        console.log(GeneratedP2.slice(0,idx1))
+        setGeneratedP2(GeneratedP2.slice(0,idx1))
+      }
+      if (GeneratedP2[i][0] === '2'){
+        idx2 = i;
+      }
+    }
+    setApiP2Output(GeneratedP2.slice(0,idx1)); //setApiIntroOutput(GeneratedIntro.slice(0,idx1));
+    makeButtons('choose-two-button-container',[GeneratedP2[idx1],GeneratedP2[idx2]],0)
+    setIsP2Generating(false);
     //setSelectedTitle(true);
     setHasBeenCalled(false);
     console.log("has been called? ",hasBeenCalled)
@@ -269,14 +335,25 @@ const Home = () => {
           </div>
         )}
 
-        {/* let's see if it works better by having it's own section to print the first part of the story
-        {apiIntroOutput && (
-          <div className='output-content'>
-            <p>{apiIntroOutput}</p>
-            <div id='choose-one-button-container'>
+        {/* ok great, now lets work on step 5, using the selected story path from the intro to generate the next step of the story*/}
+        {selectedIntro && (
+          <div>
+            <div className='generate-title'>
+              <div className='generate-title-header-container'>
+                <div className='output-header'>
+                  <h3>Awesome choice! Let's continue our adventure.  </h3>
+                  <div className='output-content'>
+                      <div className='output-content'>
+                        <p>{apiP2Output}</p>
+                        <div id="choose-two-button-container">
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        )} */}
+        )}
         
         {/* This is the bit of code for the text entry box*/}
         <div className="prompt-container">
@@ -308,18 +385,7 @@ const Home = () => {
           )}
         </div>
       </div>
-      <div className="badge-container grow">
-        <a
-          href="https://buildspace.so/builds/ai-writer"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <div className="badge">
-            <Image src={buildspaceLogo} alt="buildspace logo" />
-            <p>build with buildspace</p>
-          </div>
-        </a>
-      </div>
+      
     </div>
   );
 };

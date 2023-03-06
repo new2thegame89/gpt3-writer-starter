@@ -130,13 +130,19 @@ textarea {
     align-items: center;
     justify-content: flex-end;
     flex: 0 0 auto;
-    flex-flow: row nowrap;
+    flex-flow: column nowrap;
     gap: 12px;
     height: min-content;
     overflow: hidden;
-    padding: 0px;
+    padding: 10px;
     position: relative;
     width: 100%;
+    background-color: rgb(255, 79, 18);
+    border-radius: 100px;
+    color: white;
+    font-weight: 700;
+    border-style: hidden;
+    margin-top: 10px;
 }
 
 .button-holder {
@@ -210,13 +216,13 @@ textarea {
     display: flex;
     flex: 0 0 auto;
     flex-flow: column nowrap;
-    gap: 10px;
+    gap: 0px;
     height: min-content;
     overflow: hidden;
-    padding: 16px 24px;
+    padding: 5px;
     position: relative;
     text-decoration: none;
-    width: min-content;
+    width: 100%;
     will-change: transform;
     cursor: pointer;
 }
