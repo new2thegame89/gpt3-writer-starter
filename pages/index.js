@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import dreamtrainLogo from '../assets/Dream_Train-removebg-preview.png';
 import buildspaceLogo from '../assets/buildspace-logo.png';
 import { useEffect, useState , useRef } from 'react';
 import generateAction from './api/generate';
@@ -107,15 +108,15 @@ const Home = () => {
 
     const data = await response.json();
     const { output } = data;
-    console.log("OpenAI replied...", output.text)
+    console.log("OpenAI replied...", output.content)
 
-    setApiOutput(`${output.text}`);
+    setApiOutput(`${output.content}`);
     console.log("------")
-    console.log(output.text.split(/(\d+)/))
+    console.log(output.content.split(/(\d+)/))
     console.log("------")
-    console.log(output.text.split(/\r?\n|\r|\n/g))
-    const GeneratedTitles = output.text.split(/\r?\n|\r|\n/g)
-    makeButtons('choose-title-container',GeneratedTitles.slice(1),1)
+    console.log(output.content.split(/\r?\n|\r|\n/g))
+    const GeneratedTitles = output.content.split(/\r?\n|\r|\n/g)
+    makeButtons('choose-title-container',GeneratedTitles.slice(2),1)
     setIsGenerating(false);
     //setSelectedTitle(false);
   }
@@ -143,30 +144,34 @@ const Home = () => {
 
     const data = await response.json();
     const { output } = data;
-    console.log("OpenAI replied with an intro...", output.text)
+    console.log("OpenAI replied with an intro...", output.content)
 
     //setApiIntroOutput(`${output.text}`);
     console.log('here i am')
     //console.log(output.text.split(' '))
-    const GeneratedIntro = output.text.split(/\r?\n|\r|\n/g)
+    const GeneratedIntro = output.content.split(/\r?\n|\r|\n/g)
     //setApiIntroOutput(GeneratedIntro);
+    console.log(GeneratedIntro[3])
     
     // find the index to option 1 and 2
     let idx1 = []
     let idx2 = []
     for (let i=0; i < GeneratedIntro.length; i++) {
-      if (GeneratedIntro[i][0] === '1'){
+      if (GeneratedIntro[i] == ''){
+        GeneratedIntro[i] = '\n\n';
+      }
+      if ((GeneratedIntro[i][0] === '1') || (GeneratedIntro[i][7] === '1')){
         idx1 = i;
         console.log(GeneratedIntro.slice(0,idx1))
         setGeneratedIntro(GeneratedIntro.slice(0,idx1))
       }
-      if (GeneratedIntro[i][0] === '2'){
+      if ((GeneratedIntro[i][0] === '2') || (GeneratedIntro[i][7] === '2')){
         idx2 = i;
       }
     }
-    setApiIntroOutput(GeneratedIntro.slice(0,idx1));
-    ApiIntroOutputRef.current = GeneratedIntro.slice(0,idx1);
-    console.log(GeneratedIntro.slice(0,idx1));
+    setApiIntroOutput(GeneratedIntro.slice(1,idx1));
+    ApiIntroOutputRef.current = GeneratedIntro.slice(1,idx1);
+    console.log(GeneratedIntro.slice(1,idx1));
     console.log(GeneratedIntro[idx1])
     console.log(GeneratedIntro[idx2])
     makeButtons('choose-one-button-container',[GeneratedIntro[idx1],GeneratedIntro[idx2]],1)
@@ -196,24 +201,27 @@ const Home = () => {
 
     const data = await response.json();
     const { output } = data;
-    console.log("OpenAI replied with Part2...", output.text)
+    console.log("OpenAI replied with Part2...", output.content)
 
     //setApiIntroOutput(`${output.text}`);
     console.log('here i am')
-    //console.log(output.text.split(' '))
-    const GeneratedP2 = output.text.split(/\r?\n|\r|\n/g)
+    console.log(output.content.split(' '))
+    const GeneratedP2 = output.content.split(/\r?\n|\r|\n/g)
     //setApiIntroOutput(GeneratedIntro);
     
     // find the index to option 1 and 2
     let idx1 = []
     let idx2 = []
     for (let i=0; i < GeneratedP2.length; i++) {
-      if (GeneratedP2[i][0] === '1'){
+      if (GeneratedP2[i] == ''){
+        GeneratedP2[i] = '\n\n';
+      }
+      if ((GeneratedP2[i][0] === '1') || (GeneratedP2[i][7] === '1')){
         idx1 = i;
         console.log(GeneratedP2.slice(0,idx1))
         setGeneratedP2(GeneratedP2.slice(0,idx1))
       }
-      if (GeneratedP2[i][0] === '2'){
+      if ((GeneratedP2[i][0] === '2') || (GeneratedP2[i][7] === '2')){
         idx2 = i;
       }
     }
@@ -245,13 +253,17 @@ const Home = () => {
         <title>Dream Train Studios</title>
         {/*<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>*/}
       </Head>
+      <div className='logo'>
+        <Image src={dreamtrainLogo} alt="dream-train-logo"/>
+      </div>
       <div className="container">
         <div className="header">
           <div className="header-title">
+            
             <h1>Choose your own adventure bedtime story generator</h1>
           </div>
           <div className="header-subtitle">
-            <h2>Generate a custom bedtime story unique to your little one every night</h2>
+            <h2>Generate a custom bedtime story every night</h2>
           </div>
         </div>
         {/* This is my attempt to layout the CYOA flow */}
@@ -290,7 +302,7 @@ const Home = () => {
         <div className='generate-title'>
           <div className='generate-title-header-container'>
             <div className='output-header'>
-              <h3>Thanks for that. Now, click below to see some title of adventures we can go on.</h3>
+              <h3>Thanks for that. Now, click below to see the titles of some adventures we can go on.</h3>
             </div>
           </div>
         </div>
@@ -320,7 +332,7 @@ const Home = () => {
               <div className='generate-title-header-container'>
                 <div className='output-header'>
                   <h3>Awesome choice! Let's start our adventure.  </h3>
-                  <h3>Dream Cloud Studios presents:</h3>
+                  <h3>Dream Train Studios presents:</h3>
                   <div className='output-content'>
                     <h3> {selectedTitle} </h3>
                       <div className='output-content'>
@@ -355,14 +367,15 @@ const Home = () => {
           </div>
         )}
         
-        {/* This is the bit of code for the text entry box*/}
+        
+        {/* {/* This is the bit of code for the text entry box
         <div className="prompt-container">
           <textarea
             className="prompt-box"
             placeholder='start typing here'
             value={userInput}
             onChange={onUserChangedText} />
-          {/* This is for the generate button */}
+          {/* This is for the generate button 
           <div className='prompt-buttons'>
             <a className={isGenerating ? 'generate-button loading' : 'generate-button'} onClick={callGenerateEndpoint}>
               <div className="generate">
@@ -370,7 +383,7 @@ const Home = () => {
               </div>
             </a>
           </div>
-          {/* Display OpenAI response to message box*/}
+          {/* Display OpenAI response to message box
           {apiOutput && (
             <div className='output'>
               <div className='output-header-container'>
@@ -382,8 +395,8 @@ const Home = () => {
               <p>{apiOutput}</p>
             </div>
           </div>
-          )}
-        </div>
+          )} 
+        </div>  */}
       </div>
       
     </div>

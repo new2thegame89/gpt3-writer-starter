@@ -137,9 +137,10 @@ textarea {
     padding: 10px;
     position: relative;
     width: 100%;
-    background-color: rgb(255, 79, 18);
+    background-color: rgb(94, 23, 235);
     border-radius: 100px;
     color: white;
+    font-size: 22px;
     font-weight: 700;
     border-style: hidden;
     margin-top: 10px;
@@ -155,13 +156,14 @@ textarea {
     gap: 12px;
     height: min-content;
     overflow: hidden;
-    padding: 5px;
+    padding: 15px;
     position: relative;
     width: 100%;
-    background-color: rgb(255, 79, 18);
+    background-color: rgb(94, 23, 235);
     border-radius: 100px;
     color: white;
     font-weight: 700;
+    font-size: 18px;
     border-style: hidden;
     margin-top: 10px;
 }
@@ -170,7 +172,7 @@ textarea {
     display: flex;
     place-content: center;
     align-items: center;
-    background-color: rgb(255, 79, 18);
+    background-color: rgb(94, 23, 235);
     border-radius: 100px;
     gap: 12px;
     overflow: hidden;
@@ -210,8 +212,8 @@ textarea {
 
 .generate-button {
     place-content: flex-start;
-    align-items: flex-start;
-    background-color: rgb(255, 79, 18);
+    align-items: center; 
+    background-color: rgb(94, 23, 235);
     border-radius: 100px;
     display: flex;
     flex: 0 0 auto;
@@ -287,6 +289,7 @@ textarea {
     width: 21px;
     height: 17px;
     image-rendering: pixelated;
+    align-items: center; 
     flex-shrink: 0;
     fill: black;
     color: black;
@@ -375,7 +378,8 @@ textarea {
 .output-content p {
     text-align: center;
     white-space: pre-line;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 22px;
 }
 
 @media (min-width: 810px) and (max-width: 1199px) {
