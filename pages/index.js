@@ -6,6 +6,7 @@ import { useEffect, useState , useRef } from 'react';
 import generateAction from './api/generate';
 import generateStoryIntroAction from './api/generateStoryIntro';
 import generateStoryP2Action from './api/generateStoryP2';
+import generateStoryP3Action from './api/generateStoryP3';
 
 let savedSelections = 'tmp'
 
@@ -26,9 +27,14 @@ const Home = () => {
   const [isTitleGenerated, setTitleGenerated] = useState(false)
   const [selectedTitle, setSelectedTitle] = useState('')
   const selectedTitleRef = useRef('')
+  const selectedOptionRef = useRef('')
   const [selectedIntro, setSelectedIntro] = useState('')
   const [generatedIntro, setGeneratedIntro] = useState('')
   const [generatedP2, setGeneratedP2] = useState('')
+  const [generatedP3, setGeneratedP3] = useState('')
+  const [isP3Generating, setIsP3Generating] = useState(false)
+  const [selectedP2, setSelectedP2] = useState('')
+  const [apiP3Output, setApiP3Output] = useState('')
 
   const [hasBeenCalled, setHasBeenCalled] = useState('');
 
@@ -52,6 +58,8 @@ const Home = () => {
   
       // attach an onclick event handler to the button
       button.onclick = async () => {
+        button.className = 'button-holder loading'
+        //button.className = 'loader'
         // capture the index and content of the selection
         const selection = element; //{ index, content: element };
         console.log('selection:', selection)
@@ -67,8 +75,11 @@ const Home = () => {
             console.log('success')
             // Call the part 2 generator
             callStoryPart2Endpoint(selectedTitleRef.current,selection,ApiIntroOutputRef.current)
+          } else if ((element_id === 'choose-two-button-container') && done ){ // should always be current step minus 1
+            // call the part 3 generator
+            console.log('hi mom')
+            callStoryPart3Endpoint(selection)
           }
-          
         }
       };
   
@@ -88,6 +99,9 @@ const Home = () => {
       setSelectedTitle(prev => savedSelections);
     } else if (element_id === 'choose-one-button-container') {
       setSelectedIntro(prev => savedSelections);
+    } else if (element_id === 'choose-two-button-container') {
+      selectedOptionRef.current = savedSelections;
+      setSelectedP2(prev => savedSelections);
     }
     return 1
   }
@@ -186,10 +200,7 @@ const Home = () => {
     setIsP2Generating(true); //setIsIntroGenerating(true);
 
     console.log("Calling OpenAI to generate P2...") 
-    console.log(selectedTitle)
-    console.log(selectedIntro)
     const selectionToUse = selection.replace(/[0-9.]/g, "");
-    console.log(selectionToUse)
     const response = await fetch('/api/generateStoryP2', {
       method: 'POST',
       headers: {
@@ -203,9 +214,6 @@ const Home = () => {
     const { output } = data;
     console.log("OpenAI replied with Part2...", output.content)
 
-    //setApiIntroOutput(`${output.text}`);
-    console.log('here i am')
-    console.log(output.content.split(' '))
     const GeneratedP2 = output.content.split(/\r?\n|\r|\n/g)
     //setApiIntroOutput(GeneratedIntro);
     
@@ -226,11 +234,55 @@ const Home = () => {
       }
     }
     setApiP2Output(GeneratedP2.slice(0,idx1)); //setApiIntroOutput(GeneratedIntro.slice(0,idx1));
-    makeButtons('choose-two-button-container',[GeneratedP2[idx1],GeneratedP2[idx2]],0)
+    makeButtons('choose-two-button-container',[GeneratedP2[idx1],GeneratedP2[idx2]],1)
     setIsP2Generating(false);
     //setSelectedTitle(true);
     setHasBeenCalled(false);
-    console.log("has been called? ",hasBeenCalled)
+  }
+
+  const callStoryPart3Endpoint = async (selection) => {
+    setHasBeenCalled(false);
+    setIsP3Generating(true); //setIsIntroGenerating(true);
+
+    console.log("Calling OpenAI to generate P3...") 
+    const selectionToUse = selection.replace(/[0-9.]/g, "");
+    const response = await fetch('/api/generateStoryP3', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ selectionToUse, userInput_ChildName }), // do i need to include the api output from the previous step here to build off of?
+      //body: JSON.stringify({ userInput }),
+    });
+
+    const data = await response.json();
+    const { output } = data;
+    console.log("OpenAI replied with Part3...", output.content)
+
+    const GeneratedP3 = output.content.split(/\r?\n|\r|\n/g)
+    //setApiIntroOutput(GeneratedIntro);
+    
+    // find the index to option 1 and 2
+    let idx1 = []
+    let idx2 = []
+    for (let i=0; i < GeneratedP3.length; i++) {
+      if (GeneratedP3[i] == ''){
+        GeneratedP3[i] = '\n\n';
+      }
+      if ((GeneratedP3[i][0] === '1') || (GeneratedP3[i][7] === '1')){
+        idx1 = i;
+        console.log(GeneratedP3.slice(0,idx1))
+        setGeneratedP2(GeneratedP3.slice(0,idx1))
+      }
+      if ((GeneratedP3[i][0] === '2') || (GeneratedP3[i][7] === '2')){
+        idx2 = i;
+      }
+    }
+    setApiP3Output(GeneratedP3.slice(0,idx1)); //setApiIntroOutput(GeneratedIntro.slice(0,idx1));
+    makeButtons('choose-three-button-container',[GeneratedP3[idx1],GeneratedP3[idx2]],0)
+    setIsP3Generating(false);
+    //setSelectedTitle(true);
+    setHasBeenCalled(false);
   }
 
   const onUserChangedText = (event) => {
@@ -309,10 +361,15 @@ const Home = () => {
         <div className='prompt-buttons'>
             <a className={isGenerating ? 'generate-button loading' : 'generate-button'} onClick={callGenerateEndpoint}>
               <div className="generate">
-              {isGenerating ? <span class="loader"></span> : <p>Let's see some titles!</p>}
-              </div>
+                {/*{isGenerating ? <span class="loader"></span> : <p>Let's see some titles!</p>}*/}
+                <p>Let's see some titles!</p>
+              </div> 
             </a>
           </div>
+          <div className="generate">
+              {isGenerating ? <span class="loader"></span> : <p></p>}
+          </div>
+
         {/* Attempt to print out generated titles into unique buttons */}
         {isTitleGenerated && (
           <div className='generate-title'>
@@ -338,6 +395,9 @@ const Home = () => {
                       <div className='output-content'>
                         <p>{apiIntroOutput}</p>
                         <div id="choose-one-button-container">
+                          <div className="generate">
+                            {isIntroGenerating ? <span class="loader"></span> : <p></p>}
+                          </div>
                         </div>
                       </div>
                   </div>
@@ -367,6 +427,25 @@ const Home = () => {
           </div>
         )}
         
+        {/* ok great, now lets work on step 6, using the selected story path from the last part to generate the next step of the story*/}
+        {selectedP2 && (
+          <div>
+            <div className='generate-title'>
+              <div className='generate-title-header-container'>
+                <div className='output-header'>
+                  <h3>Awesome choice! Let's continue Part 3 of our adventure.  </h3>
+                  <div className='output-content'>
+                      <div className='output-content'>
+                        <p>{apiP3Output}</p>
+                        <div id="choose-three-button-container">
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* {/* This is the bit of code for the text entry box
         <div className="prompt-container">

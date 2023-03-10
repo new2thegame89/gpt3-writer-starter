@@ -15,9 +15,9 @@ const P2PromptThree = ". End this section of the story with another choose your 
 const P2PromptFour = " can interact with in vivid detail.\nFormat: Have each choice numbered in its own paragraph.\n Here is the backstory: "
 const finalPrompt = "\n Continue the story here: "
 
-let promptCombo = 'Continue the story but building off the selection of SELECTION. Introduce another character for CHILD_NAME to interact with. There should be some perception of danger but nothing too scary. This is a continuation of the choose your own adventure story so finish this next part with two distinct and detailed options for the reader to go on. Do not include any references to books, only the story options. Do not add anything additional past the two options. Do not onclude the word "options" in the output';
+let promptCombo = 'Continue the story with a new sentence but build off the selection of SELECTION. Introduce another character for CHILD_NAME to interact with. There should be some perception of danger but nothing too scary. This is a continuation of the choose your own adventure story so finish this next part with two distinct and detailed options for the reader to go on. Do not include any references to books, only the story options. Do not add anything additional past the two options. Do not onclude the word "options" in the output';
 const generateStoryP2Action = async (req, res) => {
-  let message = promptCombo + '\n' + 'SELECTION: ' + req.body.selectionToUse + '\n' + 'CHILD_NAME: ' + req.body.userInput_ChildName;
+  let message = promptCombo + '\n' + 'SELECTION: ' + req.body.selectionToUse + '\n' + 'CHILD_NAME: ' + req.body.userInput_ChildName + '\nOutput: ';
   const baseCompletion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [
@@ -27,6 +27,7 @@ const generateStoryP2Action = async (req, res) => {
     })
 
     const basePromptOutput = baseCompletion.data.choices[0].message;
+    console.log(baseCompletion.data)
   // Run first prompt
   //console.log(`API: ${basePromptPrefix}${req.body.userInput}`)
   /* console.log(`API: ${P2PromptOne}${req.body.selectedTitle}${P2PromptTwo}${req.body.selectionToUse}${P2PromptThree}${req.body.userInput_ChildName}${P2PromptFour}${req.body.apiIntroOutput}${finalPrompt}`)

@@ -10,7 +10,7 @@ const introPromptOne = "Generate an introduction to the story '";
 // + user selected title
 const intoPromptTwo =  "'. The introduction should give a character introduction and provide some backstory for the adventure. "
 // + user input childs name
-const intoPromptThree = " is the main character of the story and also the reader. Give a vivid description for the back story. The story will be a choose your own adventure story so finish the introduction with two distinct and detailed options for the reader to go on. Do not include any references to books when creating the story options. Only list the story options. Do not add anything additional past the two options. Only number the option and do not use the word 'Option' for each choice. Make sure each option starts on a new line."
+const intoPromptThree = " is the main character of the story and also the reader. Give a vivid description for the back story. The story will be a choose your own adventure story so finish the introduction with two distinct and detailed options for the reader to go on. Do not include any references to books when creating the story options. Only list the story options. Do not add anything additional past the two options. Only number the option and do not use the word 'Option' for each choice. Make sure each option starts on a new line but does not have a new line past the numbering. Ensure options are numbered as either 1 or 2."
 const generateStoryIntroAction = async (req, res) => {
   // Run first prompt
   //console.log(`API: ${basePromptPrefix}${req.body.userInput}`)

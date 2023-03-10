@@ -450,9 +450,11 @@ textarea {
 
  /* Loading ring animation */
 .loader {
-    width: 18px;
-    height: 18px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
+    place-content: center flex-start;
+    position: center;
     display: inline-block;
     border-top: 2px solid #FFF;
     border-right: 2px solid transparent;
